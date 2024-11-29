@@ -11,6 +11,8 @@ public interface IState
 
 public class Idle : IState
 {
+    Animator anim;
+    
     public void Enter()
     {
 
