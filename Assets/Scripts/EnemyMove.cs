@@ -9,12 +9,14 @@ public class EnemyMove : MonoBehaviour
     Animator anim;
     private int nextMove;
     SpriteRenderer spriteRenderer;
+    CapsuleCollider2D collider;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        collider = GetComponent<CapsuleCollider2D>();
         Think();
     }
 
@@ -71,4 +73,29 @@ public class EnemyMove : MonoBehaviour
         CancelInvoke();
         Invoke("Think", 5);
     }
+    void DeActivate()
+    {
+        gameObject.SetActive(false);
+    }
+
+    void EnemyDead()
+    {
+        spriteRenderer.color = new Color(1, 1, 1, 0.3f);
+        spriteRenderer.flipY = true;
+        collider.enabled = false;
+        rigid.AddForce(Vector2.up*5, ForceMode2D.Impulse);
+        Invoke("DeActivate", 5);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Bullet")
+        {
+            Debug.Log("Àû ÇÇ°Ý!!");
+            EnemyDead();
+
+        }
+    }
+
+
 }

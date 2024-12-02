@@ -15,6 +15,10 @@ public class RubyMove : MonoBehaviour
     Animator anim;
     private bool isDamage = false;
     private int jumpCount = 0;
+    private float maxShotDelay = 50;
+    private float curShotDelay;
+    [SerializeField]
+    private GameObject bulletOb;
 
     private void Awake()
     {
@@ -26,38 +30,13 @@ public class RubyMove : MonoBehaviour
 
     private void Update()
     {
-
-        if (Input.GetButtonUp("Horizontal") && isDamage == false)
+        Move();
+        if (Input.GetButtonDown("Fire"))
         {
-            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
+            Fire();
+            Reload();
         }
-
-        if (rigid.velocity.normalized.x == 0 )
-        {
-            anim.SetBool("isRun", false);
-        }
-        else
-        {
-            anim.SetBool("isRun", true);
-        }
-
-        if (Input.GetButton("Horizontal"))
-        {
-            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == 1;
-        }
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (isjumping == true)
-            {
-                return;
-            }
-            if (jumpCount >= 1)
-                isjumping = true;
-            jumpCount++;
-            rigid.AddForce(Vector2.up* jumpPower, ForceMode2D.Impulse);
-            anim.SetBool("isJump", true);
-        }
+        
     }
 
     private void FixedUpdate()
@@ -103,12 +82,69 @@ public class RubyMove : MonoBehaviour
         }
     }
 
+    private void Move()
+    {
+        if (Input.GetButtonUp("Horizontal") && isDamage == false)
+        {
+            rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
+        }
+
+        if (rigid.velocity.normalized.x == 0)
+        {
+            anim.SetBool("isRun", false);
+        }
+        else
+        {
+            anim.SetBool("isRun", true);
+        }
+
+        if (Input.GetButton("Horizontal"))
+        {
+            spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == 1;
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (isjumping == true)
+            {
+                return;
+            }
+            if (jumpCount >= 1)
+                isjumping = true;
+            jumpCount++;
+            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            anim.SetBool("isJump", true);
+        }
+    }
+    private void Fire()
+    {
+        if (curShotDelay > maxShotDelay) return;
+        anim.SetTrigger("doAttack");
+        Vector2 vec = new Vector2(this.transform.position.x, this.transform.position.y + 1);
+        GameObject bullet = Instantiate(bulletOb, vec, this.transform.rotation);
+        Rigidbody2D rigid = bullet.GetComponent<Rigidbody2D>();
+        rigid.AddForce((spriteRenderer.flipX == true ? Vector2.right : Vector2.left) * 10, ForceMode2D.Impulse);
+
+        curShotDelay = 0;
+    }
+    private void Reload()
+    {
+        curShotDelay += Time.deltaTime;
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Enemy")
         {
             //Debug.Log("플레이어가 맞았음.");
             OnDamaged(collision.transform.position);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Cliff")
+        {
+            Debug.Log("낭떠러지로 떨어짐;;");
         }
     }
 
@@ -119,7 +155,7 @@ public class RubyMove : MonoBehaviour
 
         // Knock-Back direction 
         int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
-        rigid.AddForce(new Vector2(dirc, 1)*7, ForceMode2D.Impulse);
+        rigid.AddForce(new Vector2(dirc, 1)*10, ForceMode2D.Impulse);
 
         //피격 애니메이션 실행
         anim.SetTrigger("doDamaged"); 
@@ -133,4 +169,5 @@ public class RubyMove : MonoBehaviour
         gameObject.layer = 10;
         spriteRenderer.color = new Color(1, 1, 1, 1);
     }
+
 }
