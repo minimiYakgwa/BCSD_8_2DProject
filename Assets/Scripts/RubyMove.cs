@@ -7,70 +7,78 @@ using UnityEngine;
 public class RubyMove : MonoBehaviour
 {
     Rigidbody2D rigid;
-    GameObject ruby;
-    private float maxSpeed = 5;
-    private float jumpPower = 15;
-    private bool isjumping = false;
     SpriteRenderer spriteRenderer;
     Animator anim;
-    private bool isDamage = false;
+
+
+    private float maxShotDelay = 0.15f;
+    private float curShotDelay = 5;
+    private float maxSpeed = 5;
+    private float jumpPower = 15;
     private int jumpCount = 0;
-    private float maxShotDelay = 50;
-    private float curShotDelay;
+    private bool isjumping = false;
+    private bool isDamage = false;
+    private bool isFallDown = false;
+    
+
     [SerializeField]
     private GameObject bulletOb;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
-        ruby = GetComponent<GameObject>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
     }
 
     private void Update()
     {
-        Move();
-        if (Input.GetButtonDown("Fire"))
-        {
-            Fire();
-            Reload();
-        }
-        
+        MoveAndAnimation();
+        Fire();
+        Reload();
+
+        FallDown();
     }
 
     private void FixedUpdate()
-    {   
-        float h = Input.GetAxisRaw("Horizontal");
+    {
+        PhysicsMove();
 
-        if (isDamage == false){
-            // Ruby Move
-            if (isjumping == false)
-                rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
-            else
-                rigid.AddForce(Vector2.right * h * 0.5f, ForceMode2D.Impulse);
-            // Ruby Max Speed
-            if (Mathf.Abs(rigid.velocity.x) > maxSpeed)
-                {
-                    rigid.velocity = new Vector2(maxSpeed * h, rigid.velocity.y);
-                }
-        }
-        
+        GroundDetect();
+    }
 
-        // Ground detect
+    private void GroundDetect()
+    {
         if (rigid.velocity.y < 0)
         {
             Debug.DrawRay(rigid.position, Vector3.down, new Color(0, 1, 0));
-            Vector2 rightVec = new Vector2(rigid.position.x, rigid.position.y + 1);
-            Debug.DrawRay(rightVec, h == 1 ? Vector3.right : Vector3.left, new Color(0, 1, 1));
+
+            Vector2 downVec2 = new Vector2(rigid.position.x + 0.5f, rigid.position.y);
+            Debug.DrawRay(downVec2, Vector3.down, new Color(0, 1, 0));
+
+            Vector2 downVec3 = new Vector2(rigid.position.x - 0.5f, rigid.position.y);
+            Debug.DrawRay(downVec3, Vector3.down, new Color(0, 1, 0));
+
             RaycastHit2D rayHit = Physics2D.Raycast(rigid.position,
                 Vector3.down, 1, LayerMask.GetMask("Platform"));
-            RaycastHit2D rayHit2 = Physics2D.Raycast(rightVec, h == 1 ? Vector3.right : Vector3.left,
-                1, LayerMask.GetMask("Platform"));
 
-            if (rayHit.collider != null)
+            RaycastHit2D rayHit2 = Physics2D.Raycast(downVec2,
+                Vector3.down, 0.1f, LayerMask.GetMask("Platform"));
+
+            RaycastHit2D rayHit3 = Physics2D.Raycast(downVec3,
+                Vector3.down, 0.1f, LayerMask.GetMask("Platform"));
+
+            /*
+             * Vector2 rightVec = new Vector2(rigid.position.x, rigid.position.y + 1);
+               Debug.DrawRay(rightVec, h == 1 ? Vector3.right : Vector3.left, new Color(0, 1, 1));
+
+             * RaycastHit2D rayHit2 = Physics2D.Raycast(rightVec, h == 1 ? Vector3.right : Vector3.left,
+                1, LayerMask.GetMask("Platform"));*/
+
+
+            if (rayHit.collider != null || rayHit2.collider != null || rayHit3.collider != null)
             {
-                if (rayHit.distance < 0.5f)
+                if (rayHit.distance < 0.5f || rayHit2.distance < 0.5f || rayHit3.distance < 0.5f)
                 {
                     //Debug.Log(rayHit.collider.name);
                     anim.SetBool("isJump", false);
@@ -81,44 +89,55 @@ public class RubyMove : MonoBehaviour
             }
         }
     }
+    private void PhysicsMove()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        if (isDamage == false)
+        {
+            if (isjumping == false)
+                rigid.AddForce(Vector2.right * h, ForceMode2D.Impulse);
+            else
+                rigid.AddForce(Vector2.right * h * 0.5f, ForceMode2D.Impulse);
 
-    private void Move()
+            if (Mathf.Abs(rigid.velocity.x) > maxSpeed)
+                rigid.velocity = new Vector2(maxSpeed * h, rigid.velocity.y);
+        }
+    }
+
+    private void MoveAndAnimation()
     {
         if (Input.GetButtonUp("Horizontal") && isDamage == false)
-        {
             rigid.velocity = new Vector2(rigid.velocity.normalized.x * 0.5f, rigid.velocity.y);
-        }
 
         if (rigid.velocity.normalized.x == 0)
-        {
             anim.SetBool("isRun", false);
-        }
         else
-        {
             anim.SetBool("isRun", true);
-        }
 
         if (Input.GetButton("Horizontal"))
-        {
             spriteRenderer.flipX = Input.GetAxisRaw("Horizontal") == 1;
-        }
 
         if (Input.GetButtonDown("Jump"))
         {
             if (isjumping == true)
-            {
                 return;
-            }
+
             if (jumpCount >= 1)
                 isjumping = true;
+
             jumpCount++;
+
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+
             anim.SetBool("isJump", true);
         }
     }
+
     private void Fire()
     {
-        if (curShotDelay > maxShotDelay) return;
+        if (curShotDelay < maxShotDelay || !Input.GetButtonDown("Fire")) 
+            return;
+        
         anim.SetTrigger("doAttack");
         Vector2 vec = new Vector2(this.transform.position.x, this.transform.position.y + 1);
         GameObject bullet = Instantiate(bulletOb, vec, this.transform.rotation);
@@ -127,25 +146,27 @@ public class RubyMove : MonoBehaviour
 
         curShotDelay = 0;
     }
+
     private void Reload()
     {
-        curShotDelay += Time.deltaTime;
+        curShotDelay += Time.deltaTime * 10;
     }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            //Debug.Log("플레이어가 맞았음.");
-            OnDamaged(collision.transform.position);
+            if (this.transform.position.y > collision.transform.position.y + 1)
+                OnAttackHead();
+            else
+                OnDamaged(collision.transform.position);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Cliff")
-        {
-            Debug.Log("낭떠러지로 떨어짐;;");
-        }
+            isFallDown = true;
     }
 
     private void OnDamaged(Vector2 targetPos)
@@ -153,14 +174,12 @@ public class RubyMove : MonoBehaviour
         gameObject.layer = 11;
         spriteRenderer.color = new Color(1, 1, 1, 0.4f);
 
-        // Knock-Back direction 
         int dirc = transform.position.x - targetPos.x > 0 ? 1 : -1;
         rigid.AddForce(new Vector2(dirc, 1)*10, ForceMode2D.Impulse);
 
-        //피격 애니메이션 실행
         anim.SetTrigger("doDamaged"); 
         isDamage = true;
-        // 무적시간 설정
+
         Invoke("OffDamaged", 3);
     }
 
@@ -170,4 +189,16 @@ public class RubyMove : MonoBehaviour
         spriteRenderer.color = new Color(1, 1, 1, 1);
     }
 
+    private void OnAttackHead()
+    {
+        rigid.AddForce(Vector2.up * 10, ForceMode2D.Impulse);
+    }
+
+    private void FallDown()
+    {
+        if (!isFallDown) 
+            return;
+        Debug.Log("낭떠러지로 떨어짐;;");
+        //transform.Rotate(new Vector2(0, 100 * Time.deltaTime));
+    }
 }
