@@ -36,7 +36,7 @@ public class EnemyMove : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Bullet" ||
-            collision.gameObject.tag == "Player" && this.transform.position.y < collision.transform.position.y)
+            (collision.gameObject.tag == "Player" && this.transform.position.y + 1 < collision.transform.position.y))
             EnemyDead();
     }
 
