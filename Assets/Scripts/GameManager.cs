@@ -33,120 +33,26 @@ public class GameManager : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
-    public void OnClickStartButton()
+
+    public float playTime = 0;
+    public float bestPlayTime = 0;
+
+    private void Update()
     {
-        SceneManager.LoadScene("PlayScene");
-    }
-    public void OnClickHowToPlayButton()
-    {
-        SceneManager.LoadScene("HowToPlayScene");
-    }
-    public void OnClickExitButton()
-    {
-        Application.Quit();
+        UpdateTime();
     }
 
-    public void OnClickLoadMainButton()
+    private void UpdateTime()
     {
-        SceneManager.LoadScene("StartScene");
+        int sceneNum = SceneManager.GetActiveScene().buildIndex;
+        if (sceneNum == 2 || sceneNum == 3 || sceneNum == 4)
+            playTime += Time.deltaTime;
+        UpdateBestTime();
     }
 
-
-
-
-    /*private static GameManager instance = null;
-
-    public static GameManager Instance
+     private void UpdateBestTime()
     {
-        get
-        {
-            if (null == instance)
-            {
-                return null;
-            }
-            return instance;
-        }
+        if (GameManager.Instance.playTime > GameManager.Instance.bestPlayTime)
+            GameManager.Instance.bestPlayTime = GameManager.Instance.playTime;
     }
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-
-            DontDestroyOnLoad(this.gameObject);
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
-    }*//*
-
-
-   [SerializeField]
-    private GameObject pauseUi;
-    [SerializeField]
-    private TextMeshProUGUI textTime;
-    [SerializeField]
-    private Image playerHPBar;
-
-    private float currentTime = 0f;
-    private int playerHP = 3;
-
-    public void Update()
-    {
-        if (Input.GetButtonDown("Cancel"))
-        {
-            pauseUi.SetActive(true);
-            Time.timeScale = 0f;
-        }
-
-        UpdateUiTime();
-        UpdatePlayerHealthBar();
-    }
-
-    public void OnClickStartButton()
-    {
-        SceneManager.LoadScene("PlayScene");
-    }
-    public void OnClickHowToPlayButton()
-    {
-        SceneManager.LoadScene("HowToPlayScene");
-    }
-    public void OnClickExitButton()
-    {
-        Application.Quit();
-    }
-
-    public void OnClickLoadMainButton()
-    {
-        SceneManager.LoadScene("StartScene");
-    }
-
-    public void OnClickContinueButton()
-    {
-        pauseUi.SetActive(false);
-        Time.timeScale = 1f;
-    }
-
-    private void UpdatePlayerHealthBar()
-    {
-        playerHPBar.fillAmount = 1f / 3 * playerHP;
-    }
-
-    private void UpdateUiTime()
-    {
-        currentTime += Time.deltaTime;
-        int minute = (int)currentTime / 60;
-        int second = (int)currentTime % 60;
-        textTime.text = minute.ToString() + " : " + second.ToString();
-    }
-
-    public void UpdatePlayerHealth()
-    {
-        if (playerHP < 1)
-            SceneManager.LoadScene("GameOverScene");
-        playerHP -= 1;
-    }
-
-*/
 }

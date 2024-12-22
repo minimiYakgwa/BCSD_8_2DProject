@@ -18,7 +18,6 @@ public class EnemyMove : MonoBehaviour
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         collider = GetComponent<CapsuleCollider2D>();
-
         Think();
     }
 
@@ -101,7 +100,7 @@ public class EnemyMove : MonoBehaviour
         spriteRenderer.flipY = true;
         collider.enabled = false;
         rigid.AddForce(Vector2.up*5, ForceMode2D.Impulse);
-
+        GameManager.Instance.playTime -= 3f;
         Invoke("DeActivate", 5);
     }
 }

@@ -9,7 +9,7 @@ public class RubyMove : MonoBehaviour
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator anim;
-    
+  
 
     private float maxShotDelay = 0.15f;
     private float curShotDelay = 5;

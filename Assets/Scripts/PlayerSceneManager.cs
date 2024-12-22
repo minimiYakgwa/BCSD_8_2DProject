@@ -14,7 +14,7 @@ public class PlayerSceneManager : MonoBehaviour
     [SerializeField]
     private Image playerHPBar;
 
-    private float currentTime = 0f;
+    public float currentTime = 0f;
     private int playerHP = 3;
 
     public void Update()
@@ -25,13 +25,15 @@ public class PlayerSceneManager : MonoBehaviour
             Time.timeScale = 0f;
         }
 
+        if (!pauseUi.activeSelf)
+            Time.timeScale = 1f;
+
         UpdateUiTime();
         UpdatePlayerHealthBar();
     }
     public void OnClickContinueButton()
     {
         pauseUi.SetActive(false);
-        Time.timeScale = 1f;
     }
     private void UpdatePlayerHealthBar()
     {
@@ -40,17 +42,39 @@ public class PlayerSceneManager : MonoBehaviour
 
     private void UpdateUiTime()
     {
-        currentTime += Time.deltaTime;
-        int minute = (int)currentTime / 60;
-        int second = (int)currentTime % 60;
+        //currentTime += Time.deltaTime;
+        //int minute = (int)currentTime / 60;
+        //int second = (int)currentTime % 60;
+        int minute = (int)GameManager.Instance.playTime / 60;
+        int second = (int)GameManager.Instance.playTime % 60;
         textTime.text = minute.ToString() + " : " + second.ToString();
     }
 
     public void UpdatePlayerHealth()
     {
         if (playerHP <= 1)
+        {
+            CalScore();
             SceneManager.LoadScene("GameOverScene");
+        }
         playerHP -= 1;
     }
 
+    public void CalScore()
+    {
+        if (playerHP <= 1)
+            GameManager.Instance.playTime = 0;
+    }
+
+    public void OnClickStartButton()
+    {
+        SceneManager.LoadScene("PlayScene");
+    }
+    public void OnClickExitButton()
+    {
+        Application.Quit();
+    }
+
 }
+
+
