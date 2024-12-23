@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Mono.Cecil.Cil;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class RubyMove : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class RubyMove : MonoBehaviour
         Fire();
         Reload();
 
-        FallDown();
+        IsFallDown();
     }
 
     private void FixedUpdate()
@@ -183,7 +184,7 @@ public class RubyMove : MonoBehaviour
         anim.SetTrigger("doDamaged"); 
         isDamage = true;
 
-        playerSceneManager.UpdatePlayerHealth();
+        GameManager.Instance.UpdatePlayerHealth();
 
         Invoke("OffDamaged", 3);
     }
@@ -196,14 +197,16 @@ public class RubyMove : MonoBehaviour
 
     private void OnAttackHead()
     {
+        jumpCount -= 1;
         rigid.AddForce(Vector2.up * 10, ForceMode2D.Impulse);
     }
 
-    private void FallDown()
+    private void IsFallDown()
     {
         if (!isFallDown) 
             return;
         Debug.Log("³¶¶°·¯Áö·Î ¶³¾îÁü;;");
+        GameManager.Instance.UpdatePlayerHealth(true);
         //transform.Rotate(new Vector2(0, 100 * Time.deltaTime));
     }
 }

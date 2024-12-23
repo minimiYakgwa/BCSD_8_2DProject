@@ -13,9 +13,15 @@ public class PlayerSceneManager : MonoBehaviour
     private TextMeshProUGUI textTime;
     [SerializeField]
     private Image playerHPBar;
+    [SerializeField]
+    private Image bossHPBar;
+    [SerializeField]
+    private Boss boss;
 
     public float currentTime = 0f;
     private int playerHP = 3;
+    private int BossHP = 10;
+
 
     public void Update()
     {
@@ -30,6 +36,7 @@ public class PlayerSceneManager : MonoBehaviour
 
         UpdateUiTime();
         UpdatePlayerHealthBar();
+        UpdateBossHealthBar();
     }
     public void OnClickContinueButton()
     {
@@ -37,43 +44,33 @@ public class PlayerSceneManager : MonoBehaviour
     }
     private void UpdatePlayerHealthBar()
     {
-        playerHPBar.fillAmount = 1f / 3 * playerHP;
+        playerHPBar.fillAmount = 1f / 3 * GameManager.Instance.playerHP;
+    }
+    private void UpdateBossHealthBar()
+    {
+        bossHPBar.fillAmount = 1f / 10 * GameManager.Instance.bossHP;
     }
 
     private void UpdateUiTime()
     {
-        //currentTime += Time.deltaTime;
-        //int minute = (int)currentTime / 60;
-        //int second = (int)currentTime % 60;
         int minute = (int)GameManager.Instance.playTime / 60;
         int second = (int)GameManager.Instance.playTime % 60;
         textTime.text = minute.ToString() + " : " + second.ToString();
     }
 
-    public void UpdatePlayerHealth()
-    {
-        if (playerHP <= 1)
-        {
-            CalScore();
-            SceneManager.LoadScene("GameOverScene");
-        }
-        playerHP -= 1;
-    }
-
-    public void CalScore()
-    {
-        if (playerHP <= 1)
-            GameManager.Instance.playTime = 0;
-    }
-
     public void OnClickStartButton()
     {
+        GameManager.Instance.playerHP = 3;
+        GameManager.Instance.bossHP = 10;
+        GameManager.Instance.playTime = 0;
         SceneManager.LoadScene("PlayScene");
     }
     public void OnClickExitButton()
     {
         Application.Quit();
     }
+
+
 
 }
 

@@ -36,7 +36,8 @@ public class GameManager : MonoBehaviour
 
     public float playTime = 0;
     public float bestPlayTime = 0;
-
+    public int playerHP = 3;
+    public int bossHP = 10; 
     private void Update()
     {
         UpdateTime();
@@ -54,5 +55,34 @@ public class GameManager : MonoBehaviour
     {
         if (GameManager.Instance.playTime > GameManager.Instance.bestPlayTime)
             GameManager.Instance.bestPlayTime = GameManager.Instance.playTime;
+    }
+
+    public void UpdatePlayerHealth(bool isFallDown = false)
+    {
+        if (isFallDown)
+            playerHP = 0;
+        playerHP -= 1;
+        if (playerHP <= 0)
+        {
+            CalScore();
+            SceneManager.LoadScene("GameOverScene");
+        }
+    }
+
+    public bool UpdateBossHealth()
+    {   
+        bossHP -= 1;
+        if (bossHP <= 0)
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
+    public void CalScore()
+    {
+        if (playerHP <= 1)
+            GameManager.Instance.playTime = 0;
     }
 }

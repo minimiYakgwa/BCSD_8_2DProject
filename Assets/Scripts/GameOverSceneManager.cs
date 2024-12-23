@@ -26,6 +26,7 @@ public class GameOverSceneManager : MonoBehaviour
     }
     public void OnClickLoadMainButton()
     {
+        GameManager.Instance.playTime = 0;
         SceneManager.LoadScene("StartScene");
     }
     public void OnClickExitButton()
@@ -34,6 +35,9 @@ public class GameOverSceneManager : MonoBehaviour
     }
     public void OnClickStartButton()
     {
+        GameManager.Instance.playerHP = 3;
+        GameManager.Instance.bossHP = 10;
+        GameManager.Instance.playTime = 0;
         SceneManager.LoadScene("PlayScene");
     }
 }

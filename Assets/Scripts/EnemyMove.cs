@@ -44,7 +44,7 @@ public class EnemyMove : MonoBehaviour
         Vector2 frontVec = new Vector2(rigid.position.x + nextMove, rigid.position.y);
         Debug.DrawRay(frontVec, Vector3.down, new Color(0, 1, 1));
 
-        Vector2 rightVec = new Vector2(rigid.position.x, rigid.position.y + 1);
+        Vector2 rightVec = new Vector2(rigid.position.x, rigid.position.y + 0.5f);
         Debug.DrawRay(rightVec, nextMove == 1 ? Vector3.right : Vector3.left, new Color(0, 1, 1));
 
         RaycastHit2D rayHit = Physics2D.Raycast(frontVec, Vector3.down, 1, LayerMask.GetMask("Platform"));
@@ -56,7 +56,11 @@ public class EnemyMove : MonoBehaviour
 
     private void Move()
     {
-        rigid.velocity = new Vector2(nextMove, rigid.velocity.y);
+        int speed = 1;
+        if (gameObject.layer == 8)
+            speed = 7;
+
+        rigid.velocity = new Vector2(nextMove * speed, rigid.velocity.y);
     }
 
     private void RunningAnimation()
@@ -100,7 +104,7 @@ public class EnemyMove : MonoBehaviour
         spriteRenderer.flipY = true;
         collider.enabled = false;
         rigid.AddForce(Vector2.up*5, ForceMode2D.Impulse);
-        GameManager.Instance.playTime -= 3f;
+        GameManager.Instance.playTime -= 1f;
         Invoke("DeActivate", 5);
     }
 }
