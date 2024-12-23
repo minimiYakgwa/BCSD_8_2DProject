@@ -22,7 +22,6 @@ public class PlayerSceneManager : MonoBehaviour
     private int playerHP = 3;
     private int BossHP = 10;
 
-
     public void Update()
     {
         if (Input.GetButtonDown("Cancel"))

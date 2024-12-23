@@ -16,8 +16,8 @@ TagManager:
   - Water
   - UI
   - Platform
-  - Enemy3
   - EnemyDamaged
+  - Enemy2
   - Enemy
   - Player
   - PlayerDamaged

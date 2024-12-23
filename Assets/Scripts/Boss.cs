@@ -11,12 +11,16 @@ public class Boss : MonoBehaviour
     LineRenderer lineRenderer;
     [SerializeField]
     GameObject walls;
+    [SerializeField]
+    BoxCollider2D boxCollider2D;
 
     SpriteRenderer spriteRenderer;
     CapsuleCollider2D collider;
     Rigidbody2D rigid;
 
     public int currentHP = 10;
+    private float currentTime = 0f;
+    
 
     private void Awake()
     {
@@ -24,25 +28,29 @@ public class Boss : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         collider = GetComponent<CapsuleCollider2D>();
         rigid = GetComponent<Rigidbody2D>();
+
+        lineRenderer.positionCount = 2;
     }
     private void Update()
     {
         //AttackToPlayer();
-        //AttackLaser();
+        AttackLaser();
     }
 
-    private IEnumerator AttackLaser()
+    private void AttackLaser()
     {
 
         if (!isPossibleToAttackTarget())
         {
             DisableLaser();
         }
-        EnableLaser();
-
-        AttackToPlayer();
-
-        yield return null;
+        else
+        {
+            if ( lineRenderer.gameObject.activeSelf == false)
+                EnableLaser();
+            AttackToPlayer();
+        }
+        
     }
 
     private bool isPossibleToAttackTarget()
@@ -58,15 +66,35 @@ public class Boss : MonoBehaviour
 
     private void AttackToPlayer()
     {
-        while (true)
-        {   
+        currentTime += Time.deltaTime;
+        lineRenderer.endWidth = Mathf.Lerp(0f, 1f, currentTime / 5f);
+        lineRenderer.startWidth = Mathf.Lerp(0f, 1f, currentTime / 5f);
+        if (currentTime > 5f)
+        {
+            if (!boxCollider2D.enabled)
+            {
+                lineRenderer.material.color = Color.yellow;
+                boxCollider2D.enabled = true;
+                WaitForSec();
+            }
+            currentTime = 0f;
+                
+        }
+        else
+        {
             lineRenderer.SetPosition(0, this.transform.position);
-        
             lineRenderer.SetPosition(1, player.transform.position);
-
         }
         
+        
     }
+    private IEnumerator WaitForSec()
+    {
+        yield return new WaitForSeconds(1f);
+        boxCollider2D.enabled = false;
+        lineRenderer.material.color = Color.red;
+    }
+
 
     private void EnableLaser()
     {
@@ -90,7 +118,7 @@ public class Boss : MonoBehaviour
         if (GameManager.Instance.UpdateBossHealth())
             EnemyDead();
         spriteRenderer.color = new Color(1, 0, 0, 0.5f);
-        this.gameObject.layer = 8;
+        this.gameObject.layer = 7;
         Invoke("Recovery", 0.5f);
             
     }
